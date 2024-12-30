@@ -7,9 +7,9 @@ namespace Flow\ETL\Adapter\ChartJS\Tests\Unit\Chart;
 use function Flow\ETL\DSL\{df, from_memory, ref, refs};
 use Flow\ETL\Adapter\ChartJS\Chart\BarChart;
 use Flow\ETL\Memory\ArrayMemory;
-use PHPUnit\Framework\TestCase;
+use Flow\ETL\Tests\FlowTestCase;
 
-final class BarChartTest extends TestCase
+final class BarChartTest extends FlowTestCase
 {
     public function test_collecting_data_from_rows() : void
     {

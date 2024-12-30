@@ -7,9 +7,9 @@ namespace Flow\ETL\Adapter\ChartJS\Tests\Integration;
 use function Flow\ETL\Adapter\ChartJS\{bar_chart, line_chart, pie_chart, to_chartjs, to_chartjs_file, to_chartjs_var};
 use function Flow\ETL\DSL\{df, first, from_array, lit, ref, refs, sum};
 use function Flow\Filesystem\DSL\path;
-use PHPUnit\Framework\TestCase;
+use Flow\ETL\Tests\FlowTestCase;
 
-final class ChartJSLoaderTest extends TestCase
+final class ChartJSLoaderTest extends FlowTestCase
 {
     public function test_loading_data_to_bar_chart() : void
     {
