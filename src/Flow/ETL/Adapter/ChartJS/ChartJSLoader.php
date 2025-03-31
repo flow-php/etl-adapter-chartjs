@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Flow\ETL\Adapter\ChartJS;
 
-use Flow\ETL\Loader\Closure;
 use Flow\ETL\{FlowContext, Loader, Rows};
+use Flow\ETL\Loader\Closure;
 use Flow\Filesystem\Path;
 
 final class ChartJSLoader implements Closure, Loader
