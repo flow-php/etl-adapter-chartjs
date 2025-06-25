@@ -13,7 +13,7 @@ final class LineChart implements Chart
     /**
      * @var array{
      *   labels: array<string>,
-     *   datasets: array<string, array{label: string, data: array}>
+     *   datasets: array<string, array{label: string, data: array<mixed>}>
      * }
      */
     private array $data = [
@@ -21,8 +21,14 @@ final class LineChart implements Chart
         'datasets' => [],
     ];
 
+    /**
+     * @var array<string, array<array-key, mixed>>
+     */
     private array $datasetOptions = [];
 
+    /**
+     * @var array<array-key, mixed>
+     */
     private array $options = [];
 
     public function __construct(
@@ -34,7 +40,8 @@ final class LineChart implements Chart
     public function collect(Rows $rows) : void
     {
         foreach ($rows as $row) {
-            $this->data['labels'][] = (string) $row->valueOf($this->label);
+            $labelValue = $row->valueOf($this->label);
+            $this->data['labels'][] = \is_scalar($labelValue) ? (string) $labelValue : '';
 
             foreach ($this->datasets as $dataset) {
                 if (!\array_key_exists($dataset->name(), $this->data['datasets'])) {
@@ -49,6 +56,9 @@ final class LineChart implements Chart
         }
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
     public function data() : array
     {
         $data = [
@@ -74,6 +84,9 @@ final class LineChart implements Chart
         return $data;
     }
 
+    /**
+     * @param array<array-key, mixed> $options
+     */
     public function setDatasetOptions(Reference $dataset, array $options) : self
     {
         $this->datasetOptions[$dataset->name()] = $options;
@@ -81,6 +94,9 @@ final class LineChart implements Chart
         return $this;
     }
 
+    /**
+     * @param array<array-key, mixed> $options
+     */
     public function setOptions(array $options) : self
     {
         $this->options = $options;

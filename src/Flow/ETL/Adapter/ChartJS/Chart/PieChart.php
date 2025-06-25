@@ -12,7 +12,7 @@ final class PieChart implements Chart
 {
     /**
      * @var array{
-     *   datasets: array<string, array{data: array, label: ?string}>
+     *   datasets: array<string, array{data: array<mixed>, label: ?string}>
      * }
      */
     private array $data = [
@@ -24,6 +24,9 @@ final class PieChart implements Chart
      */
     private array $datasetOptions = [];
 
+    /**
+     * @var array<array-key, mixed>
+     */
     private array $options = [];
 
     public function __construct(
@@ -39,16 +42,20 @@ final class PieChart implements Chart
                 if (!\array_key_exists('pie', $this->data['datasets'])) {
                     $this->data['datasets']['pie'] = [
                         'data' => [$row->valueOf($dataset)],
-                        'label' => (string) $row->valueOf($this->label),
+                        'label' => \is_scalar($row->valueOf($this->label)) ? (string) $row->valueOf($this->label) : '',
                     ];
                 } else {
                     $this->data['datasets']['pie']['data'][] = $row->valueOf($dataset);
-                    $this->data['datasets']['pie']['label'] = (string) $row->valueOf($this->label);
+                    $labelValue = $row->valueOf($this->label);
+                    $this->data['datasets']['pie']['label'] = \is_scalar($labelValue) ? (string) $labelValue : '';
                 }
             }
         }
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
     public function data() : array
     {
         $labels = [];
@@ -78,6 +85,9 @@ final class PieChart implements Chart
         return $data;
     }
 
+    /**
+     * @param array<array-key, mixed> $options
+     */
     public function setDatasetOptions(Reference $dataset, array $options) : self
     {
         $this->datasetOptions[$dataset->name()] = $options;
@@ -85,6 +95,9 @@ final class PieChart implements Chart
         return $this;
     }
 
+    /**
+     * @param array<array-key, mixed> $options
+     */
     public function setOptions(array $options) : self
     {
         $this->options = $options;
