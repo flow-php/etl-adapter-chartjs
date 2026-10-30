@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flow\ETL\Adapter\ChartJS;
+namespace Flow\ETL\Adapter\ChartJS\IO\Loader;
 
-use Flow\ETL\Row\Reference;
-use Flow\ETL\Rows;
+use Flow\ETL\Functions\Reference\Reference;
+use Flow\ETL\Values\Rows;
 
 interface Chart
 {

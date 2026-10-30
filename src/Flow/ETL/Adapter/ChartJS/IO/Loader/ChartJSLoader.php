@@ -2,25 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Flow\ETL\Adapter\ChartJS;
+namespace Flow\ETL\Adapter\ChartJS\IO\Loader;
 
-use Flow\ETL\Config\Telemetry\TelemetryAttributes;
-use Flow\ETL\Exception\InvalidArgumentException;
-use Flow\ETL\Exception\RuntimeException;
-use Flow\ETL\FlowContext;
-use Flow\ETL\Loader;
-use Flow\ETL\Loader\Closure;
-use Flow\ETL\Rows;
+use Flow\ETL\Foundation\Describe\Description;
+use Flow\ETL\Foundation\Describe\Rebuild;
+use Flow\ETL\Foundation\Exception\InvalidArgumentException;
+use Flow\ETL\Foundation\Exception\RuntimeException;
+use Flow\ETL\IO\Loader;
+use Flow\ETL\IO\Loader\Closure;
+use Flow\ETL\Values\Column\Backend;
+use Flow\ETL\Values\Rows;
 use Flow\Filesystem\Filesystem;
 use Flow\Filesystem\Local\NativeLocalFilesystem;
 use Flow\Filesystem\Path;
-use Throwable;
+use SensitiveParameter;
 
-use function Flow\Filesystem\DSL\path;
 use function implode;
 use function iterator_to_array;
 use function json_encode;
-use function sprintf;
 use function str_replace;
 
 final class ChartJSLoader implements Closure, Loader
@@ -41,11 +40,21 @@ final class ChartJSLoader implements Closure, Loader
     public function __construct(
         private readonly Chart $type,
     ) {
-        $this->template = path(__DIR__ . '/Resources/template/full_page.html');
+        $this->template = Path::from(__DIR__ . '/../../Resources/template/full_page.html');
         $this->templateFilesystem = new NativeLocalFilesystem();
     }
 
-    public function closure(FlowContext $context): void
+    public static function fromDescription(#[SensitiveParameter] array $data, Rebuild $rebuild): static
+    {
+        throw InvalidArgumentException::because('%s holds live state and is never described', self::class);
+    }
+
+    public function describe(): ?Description
+    {
+        return null;
+    }
+
+    public function closure(): void
     {
         if ($this->output === null && $this->outputVar === null) {
             return;
@@ -63,9 +72,11 @@ final class ChartJSLoader implements Closure, Loader
             $template = implode('', iterator_to_array($templateStream->readLines()));
             $templateStream->close();
 
-            $content = str_replace('%_CHART_DATA_%', json_encode($this->type->data(), JSON_THROW_ON_ERROR), $template);
-
-            $output->append($content);
+            $output->append(str_replace(
+                '%_CHART_DATA_%',
+                json_encode($this->type->data(), JSON_THROW_ON_ERROR),
+                $template,
+            ));
 
             $output->close();
         }
@@ -75,23 +86,13 @@ final class ChartJSLoader implements Closure, Loader
         }
     }
 
-    public function load(Rows $rows, FlowContext $context): void
+    public function load(Rows $rows, Backend $backend): void
     {
         if (!$rows->count()) {
             return;
         }
 
-        $context->telemetry()->loadingStarted($this);
-
-        try {
-            $this->type->collect($rows);
-
-            $context->telemetry()->loadingCompleted($this, [TelemetryAttributes::ATTR_LOADING_ROWS => $rows->count()]);
-        } catch (Throwable $e) {
-            $context->telemetry()->loadingFailed($this, $e);
-
-            throw $e;
-        }
+        $this->type->collect($rows);
     }
 
     public function withOutputPath(Path $output, Filesystem $filesystem = new NativeLocalFilesystem()): self
@@ -101,15 +102,8 @@ final class ChartJSLoader implements Closure, Loader
             throw new RuntimeException('Stream path must have an extension, given: ' . $output->uri());
         }
 
-        if (!$filesystem->supports($output)) {
-            throw new InvalidArgumentException(sprintf(
-                'Filesystem %s serves "%s://" paths, given: "%s". Pass the filesystem that handles '
-                . 'this scheme, e.g. withOutputPath($path, aws_s3_filesystem(...)).',
-                $filesystem::class,
-                $filesystem->mount()->protocol,
-                $output->uri(),
-            ));
-        }
+        $filesystem->supports($output)
+            || throw InvalidArgumentException::unsupportedPath($filesystem, $output, 'withOutputPath');
 
         $this->outputFilesystem = $filesystem;
         $this->output = $output;
@@ -129,15 +123,8 @@ final class ChartJSLoader implements Closure, Loader
 
     public function withTemplate(Path $template, Filesystem $filesystem = new NativeLocalFilesystem()): self
     {
-        if (!$filesystem->supports($template)) {
-            throw new InvalidArgumentException(sprintf(
-                'Filesystem %s serves "%s://" paths, given: "%s". Pass the filesystem that handles '
-                . 'this scheme, e.g. withTemplate($path, aws_s3_filesystem(...)).',
-                $filesystem::class,
-                $filesystem->mount()->protocol,
-                $template->uri(),
-            ));
-        }
+        $filesystem->supports($template)
+            || throw InvalidArgumentException::unsupportedPath($filesystem, $template, 'withTemplate');
 
         $this->templateFilesystem = $filesystem;
         $this->template = $template;

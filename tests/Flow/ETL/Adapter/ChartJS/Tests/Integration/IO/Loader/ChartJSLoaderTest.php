@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flow\ETL\Adapter\ChartJS\Tests\Integration;
+namespace Flow\ETL\Adapter\ChartJS\Tests\Integration\IO\Loader;
 
-use Flow\ETL\Exception\InvalidArgumentException;
-use Flow\ETL\Exception\RuntimeException;
+use Flow\ETL\Foundation\Exception\InvalidArgumentException;
+use Flow\ETL\Foundation\Exception\RuntimeException;
 use Flow\ETL\Tests\FlowTestCase;
 
 use function Flow\ETL\Adapter\ChartJS\bar_chart;
@@ -126,7 +126,7 @@ final class ChartJSLoaderTest extends FlowTestCase
                         ),
                     ),
                 )
-                    ->withOutputPath(path($output = __DIR__ . '/Output/bar_chart.html')),
+                    ->withOutputPath(path($output = __DIR__ . '/../../Output/bar_chart.html')),
             )
             ->run();
 
@@ -375,7 +375,7 @@ final class ChartJSLoaderTest extends FlowTestCase
                         ref('Profit'),
                     ),
                 ),
-                $output = __DIR__ . '/Output/line_chart.html',
+                $output = __DIR__ . '/../../Output/line_chart.html',
             ))
             ->run();
 
@@ -508,7 +508,7 @@ final class ChartJSLoaderTest extends FlowTestCase
                 sum(ref('Shipping Costs')->as('Shipping Costs')),
                 sum(ref('Profit')->as('Profit')),
             ])
-            ->write(to_chartjs_file($chart, $output = __DIR__ . '/Output/pie_chart.html'))
+            ->write(to_chartjs_file($chart, $output = __DIR__ . '/../../Output/pie_chart.html'))
             ->run();
 
         static::assertSame(

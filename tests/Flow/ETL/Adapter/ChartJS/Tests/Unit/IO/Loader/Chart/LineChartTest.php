@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Flow\ETL\Adapter\ChartJS\Tests\Unit\Chart;
+namespace Flow\ETL\Adapter\ChartJS\Tests\Unit\IO\Loader\Chart;
 
 use Flow\ETL\Tests\FlowTestCase;
 

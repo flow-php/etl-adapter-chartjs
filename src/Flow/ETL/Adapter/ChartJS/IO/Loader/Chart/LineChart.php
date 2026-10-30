@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Flow\ETL\Adapter\ChartJS\Chart;
+namespace Flow\ETL\Adapter\ChartJS\IO\Loader\Chart;
 
-use Flow\ETL\Adapter\ChartJS\Chart;
-use Flow\ETL\Row\Reference;
-use Flow\ETL\Row\References;
-use Flow\ETL\Rows;
+use Flow\ETL\Adapter\ChartJS\IO\Loader\Chart;
+use Flow\ETL\Functions\Reference\Reference;
+use Flow\ETL\Functions\Reference\References;
+use Flow\ETL\Values\Rows;
 
 use function array_key_exists;
 use function array_map;
@@ -79,9 +79,7 @@ final class LineChart implements Chart
             'data' => [
                 'labels' => $this->data['labels'],
                 'datasets' => array_values(array_map(function (array $dataset): array {
-                    $options = $this->datasetOptions[$dataset['label']] ?? [];
-
-                    return array_merge($dataset, $options);
+                    return array_merge($dataset, $this->datasetOptions[$dataset['label']] ?? []);
                 }, $this->data['datasets'])),
             ],
         ];
